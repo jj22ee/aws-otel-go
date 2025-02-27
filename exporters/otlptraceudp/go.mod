@@ -1,4 +1,4 @@
-module github.com/aws-observability/aws-otel-go/exporters/otlptraceudp
+module github.com/jj22ee/aws-otel-go/exporters/otlptraceudp
 
 go 1.22.0
 
