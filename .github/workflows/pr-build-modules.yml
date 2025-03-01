@@ -83,5 +83,12 @@ jobs:
         GOARCH: ${{ matrix.platform.arch }}
       run: |
         go test -coverprofile=coverage.out -race ./...
-        go tool cover -func=coverage.out
-        go tool cover -html=coverage.out -o coverage.html
+        coverage=$(go tool cover -func=coverage.out | fgrep total | awk '{print substr($3, 1, length($3)-1)}')
+        # go tool cover -html=coverage.out -o coverage.html
+
+        coverage_rounded=$(printf '%.0f' $coverage)
+        min_coverage=70 # this is 70.00%
+        if [[ coverage_rounded -lt min_coverage ]]; then
+            echo "Module Coverage ($coverage_rounded) is less than the required minimum coverage ($min_coverage)"
+            exit 1
+        fi
