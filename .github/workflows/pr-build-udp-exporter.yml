@@ -67,19 +67,21 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
         check-latest: true
-    - name: Run tests for Module
+
+    - name: Run tests for Module with Coverage
+      if: ${{ matrix.platform.os }} == 'windows-latest'
       working-directory: ${{ matrix.module }}
       env:
         GOARCH: ${{ matrix.platform.arch }}
       run: |
-        GO_ARGS=${{ matrix.platform.os != 'windows-latest' &&  '-coverprofile=coverage.out' || '' }}
-        go test $GO_ARGS -race ./...
+        go test -cover -race ./...
 
-    - name: Generate Coverage from Module tests
+    - name: Run tests for Module and Generate Detailed Coverage Report
       if: ${{ matrix.platform.os }} != 'windows-latest'
       working-directory: ${{ matrix.module }}
       env:
         GOARCH: ${{ matrix.platform.arch }}
       run: |
+        go test -coverprofile=coverage.out -race ./...
         go tool cover -func=coverage.out
         go tool cover -html=coverage.out -o coverage.html
