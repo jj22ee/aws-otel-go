@@ -47,7 +47,7 @@ jobs:
     needs: detect-modules-to-lint-and-test
     strategy:
       matrix:
-        modules: ${{ fromJSON(needs.detect-modules-to-lint-and-test.outputs.modules) }}
+        module: ${{ fromJSON(needs.detect-modules-to-lint-and-test.outputs.modules) }}
         go-version: ["1.24.0", "1.23.0", "~1.22.4"]
         platform:
           - os: ubuntu-latest
@@ -68,12 +68,18 @@ jobs:
         go-version: ${{ matrix.go-version }}
         check-latest: true
     - name: Run tests for Module
+      working-directory: ${{ matrix.module }}
       env:
         GOARCH: ${{ matrix.platform.arch }}
       run: |
-        cd ${{ matrix.modules }}
-        go test -coverprofile=coverage.out -race ./...
-        if [ "${{ matrix.platform.arch }}" -ne "windows-latest" ]; then
-            go tool cover -func=coverage.out
-            go tool cover -html=c.out -o coverage.html
-        fi
+        GO_ARGS=${{ matrix.platform.os != 'windows-latest' &&  '-coverprofile=coverage.out' || '' }}
+        go test $GO_ARGS -race ./...
+
+    - name: Generate Coverage from Module tests
+      if: ${{ matrix.platform.os }} != 'windows-latest'
+      working-directory: ${{ matrix.module }}
+      env:
+        GOARCH: ${{ matrix.platform.arch }}
+      run: |
+        go tool cover -func=coverage.out
+        go tool cover -html=coverage.out -o coverage.html
