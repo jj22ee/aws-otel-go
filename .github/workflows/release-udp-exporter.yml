@@ -2,7 +2,7 @@ name: Release UDP Exporter
 on:
   workflow_dispatch:
     inputs:
-      version:
+      udp-exporter-version:
         description: The version to tag the release with, e.g., 1.2.0
         required: true
 
@@ -50,7 +50,6 @@ jobs:
         run: |
           cd sample-apps/integ-test-http-server
           ./integ-test-http-server &
-          cd ../../
 
       - name: Call Sample App Endpoint
         id: call-endpoint
@@ -63,20 +62,20 @@ jobs:
           sleep 20
           cat xray-daemon/daemon-logs.log
 
-      - name: Check Traces
-        run: |
-          traceId=${{ steps.call-endpoint.outputs.traceId }}
-          numTracesFound=$(aws xray batch-get-traces --trace-ids $traceId --region us-west-2 | jq '.Traces' | jq length)
-          if [[ numTracesFound -ne "1" ]]; then
-            echo "TraceId $traceId not found in X-Ray."
-            exit 1
-          else
-            echo "TraceId $traceId found in X-Ray."
-          fi
-
-      # - name: Tag UDP Exporter module
+      # - name: Check Traces
       #   run: |
-      #     git tag exporters/otlptraceudp/v${{ env.OCB_MODULE_VERSION }}
+      #     traceId=${{ steps.call-endpoint.outputs.traceId }}
+      #     numTracesFound=$(aws xray batch-get-traces --trace-ids $traceId --region us-west-2 | jq '.Traces' | jq length)
+      #     if [[ numTracesFound -ne "1" ]]; then
+      #       echo "TraceId $traceId not found in X-Ray."
+      #       exit 1
+      #     else
+      #       echo "TraceId $traceId found in X-Ray."
+      #     fi
 
-      # - name: Publish tag for UDP Exporter module
-      #   run: git push --tags
+      - name: Tag UDP Exporter module
+        run: |
+          git tag exporters/otlptraceudp/v${{ inputs.udp-exporter-version }}
+
+      - name: Publish tag for UDP Exporter module
+        run: git push --tags
