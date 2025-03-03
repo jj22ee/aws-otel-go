@@ -28,6 +28,12 @@ jobs:
           cd exporters/otlptraceudp
           go test ./...
 
+      - name: Configure AWS credentials for Testing Tracing
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TEST_UDP_EXPORTER_ROLE_ARN }}
+          aws-region: 'us-west-2'
+
       - name: Download and run X-Ray Daemon
         run: |
           mkdir xray-daemon
@@ -48,14 +54,26 @@ jobs:
           cd ../../
 
       - name: Call Sample App Endpoint
+        id: call-endpoint
         run: | 
-          curl localhost:8080/test
+          echo "traceId=$(curl localhost:8080/test)" >> $GITHUB_OUTPUT
+          echo $traceId
 
       - name: Print Daemon Logs
         run: |
-          sleep 5
+          sleep 20
           cat xray-daemon/daemon-logs.log
 
+      - name: Check Traces
+        run: |
+          traceId=${{ steps.call-endpoint.outputs.traceId }}
+          numTracesFound=$(aws xray batch-get-traces --trace-ids $traceId --region us-west-2 | jq '.Traces' | jq length)
+          if [[ numTracesFound -ne "1" ]]; then
+            echo "TraceId $traceId not found in X-Ray."
+            exit 1
+          else
+            echo "TraceId $traceId found in X-Ray."
+          fi
 
       # - name: Tag UDP Exporter module
       #   run: |
