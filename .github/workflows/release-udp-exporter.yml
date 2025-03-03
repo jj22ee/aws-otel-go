@@ -5,7 +5,6 @@ on:
       version:
         description: The version to tag the release with, e.g., 1.2.0
         required: true
-  push:
 
 permissions:
   id-token: write
