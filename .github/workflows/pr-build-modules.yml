@@ -94,7 +94,7 @@ jobs:
           coverage=$(cat go_tool_coverage_output.txt | fgrep total | awk '{print substr($3, 1, length($3)-1)}')
           coverage_rounded=$(printf '%.0f' $coverage)
           echo "The Module Coverage is $coverage_rounded%"
-          min_coverage=40 # this is 40.00%
+          min_coverage=80 # this is 80.00%
           if [[ coverage_rounded -lt min_coverage ]]; then
             echo "Module Coverage ($coverage_rounded%) is less than the required minimum coverage ($min_coverage%)"
             exit 1
