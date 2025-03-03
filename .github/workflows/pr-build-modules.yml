@@ -44,7 +44,6 @@ jobs:
     needs: detect-modules-to-lint-and-test
     strategy:
       matrix:
-        # module: ${{ fromJSON(needs.detect-modules-to-lint-and-test.outputs.modules) }}
         go-version: ["1.24.0", "1.23.0", "~1.22.4"]
         platform:
           - os: ubuntu-latest
@@ -76,7 +75,6 @@ jobs:
         do
           cd $module
           go test -cover -race ./...
-          echo $rootDir
           cd $rootDir
         done
 
@@ -92,7 +90,14 @@ jobs:
           cd $module
           go test -coverprofile=coverage.out -race ./...
           go tool cover -func=coverage.out
-          go tool cover -html=coverage.out -o coverage.html
-          echo $rootDir
+          go tool cover -func=coverage.out > go_tool_coverage_output.txt
+          coverage=$(cat go_tool_coverage_output.txt | fgrep total | awk '{print substr($3, 1, length($3)-1)}')
+          coverage_rounded=$(printf '%.0f' $coverage)
+          echo "The Module Coverage is $coverage_rounded%"
+          min_coverage=40 # this is 40.00%
+          if [[ coverage_rounded -lt min_coverage ]]; then
+            echo "Module Coverage ($coverage_rounded%) is less than the required minimum coverage ($min_coverage%)"
+            exit 1
+          fi
           cd $rootDir
         done
