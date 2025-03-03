@@ -64,10 +64,6 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
         check-latest: true
-    - name: Save Root Directory
-      shell: bash
-      run: |
-        rootDir=$(pwd)
 
     - name: Run tests for Module with Coverage
       if: matrix.platform.os == 'windows-latest'
@@ -75,6 +71,7 @@ jobs:
       env:
         GOARCH: ${{ matrix.platform.arch }}
       run: |
+        rootDir=$(pwd)
         for module in ${{ join(fromJSON(needs.detect-modules-to-lint-and-test.outputs.modules), ' ') }}
         do
           cd $module
@@ -89,6 +86,7 @@ jobs:
       env:
         GOARCH: ${{ matrix.platform.arch }}
       run: |
+        rootDir=$(pwd)
         for module in ${{ join(fromJSON(needs.detect-modules-to-lint-and-test.outputs.modules), ' ') }}
         do
           cd $module
