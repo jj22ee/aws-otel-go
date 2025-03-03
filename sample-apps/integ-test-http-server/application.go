@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jj22ee/aws-otel-go/exporters/otlptraceudp"
+	"github.com/aws-observability/aws-otel-go/exporters/otlptraceudp"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/otel"
 

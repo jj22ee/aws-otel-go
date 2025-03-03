@@ -27,11 +27,11 @@ jobs:
           cd exporters/otlptraceudp
           go test ./...
 
-      - name: Configure AWS credentials for Testing Tracing
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.TEST_UDP_EXPORTER_ROLE_ARN }}
-          aws-region: 'us-west-2'
+      # - name: Configure AWS credentials for Testing Tracing
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.TEST_UDP_EXPORTER_ROLE_ARN }}
+      #     aws-region: 'us-west-2'
 
       - name: Download and run X-Ray Daemon
         run: |
